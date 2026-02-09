@@ -15,7 +15,6 @@ export default function Home() {
   const [selected, setSelected] = useState(null);
   const [name, setName] = useState("");
   const [typedName, setTypedName] = useState("");
-  const [adminPin, setAdminPin] = useState("");
   const [msg, setMsg] = useState("");
 
   async function refresh() {
@@ -48,7 +47,7 @@ export default function Home() {
     const res = await fetch("/api/unclaim", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: selected.date, typedName, adminPin }),
+      body: JSON.stringify({ date: selected.date, typedName }),
     });
     const json = await res.json();
     if (!res.ok) return setMsg(json.error || "Failed.");
@@ -66,7 +65,7 @@ export default function Home() {
   return (
     <div className="wrap">
       <header className="top">
-        <h1>Wednesday Dinner</h1>
+        <h1>Community Group</h1>
         <p className="muted">Tap a Wednesday to claim cooking for that week. Once claimed, it’s locked.</p>
       </header>
 
@@ -136,9 +135,6 @@ export default function Home() {
 
               <label>Type the cook’s name</label>
               <input value={typedName} onChange={(e) => setTypedName(e.target.value)} placeholder="Same name as above" />
-
-              <label>Admin PIN (override)</label>
-              <input value={adminPin} onChange={(e) => setAdminPin(e.target.value)} placeholder="Admin PIN" inputMode="numeric" />
 
               <button className="btn danger" onClick={unclaim}>Unclaim this week</button>
             </>

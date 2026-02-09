@@ -2,7 +2,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
-  const { date, typedName, adminPin } = body;
+  const { date, typedName } = body;
 
   if (!date) return Response.json({ error: "Missing date." }, { status: 400 });
 
@@ -17,18 +17,16 @@ export async function POST(req) {
 
   const stored = data.cook_name;
 
-  const pinOk =
-    typeof adminPin === "string" &&
-    adminPin.length > 0 &&
-    adminPin === process.env.ADMIN_PIN;
-
   const nameOk =
     typeof typedName === "string" &&
     typedName.trim().length > 0 &&
     stored.toLowerCase() === typedName.trim().toLowerCase();
 
-  if (!pinOk && !nameOk) {
-    return Response.json({ error: "Not authorized to unclaim this week." }, { status: 403 });
+  if (!nameOk) {
+    return Response.json(
+      { error: "Name doesn’t match the cook on file for this week." },
+      { status: 403 }
+    );
   }
 
   const del = await supabaseAdmin.from("wednesday_cooks").delete().eq("wed_date", date);

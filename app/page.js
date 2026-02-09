@@ -7,8 +7,14 @@ function formatLong(iso) {
   return d.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "short", day: "numeric" });
 }
 
+function formatShort(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 export default function Home() {
-  const [count, setCount] = useState(8);
+  const PAGE_SIZE = 8;
+  const [page, setPage] = useState(0);
   const [weeks, setWeeks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,13 +26,13 @@ export default function Home() {
   async function refresh() {
     setLoading(true);
     setMsg("");
-    const res = await fetch(`/api/weeks?count=${count}`, { cache: "no-store" });
+    const res = await fetch(`/api/weeks?count=${PAGE_SIZE}&page=${page}`, { cache: "no-store" });
     const json = await res.json();
     setWeeks(json.weeks || []);
     setLoading(false);
   }
 
-  useEffect(() => { refresh(); }, [count]);
+  useEffect(() => { refresh(); }, [page]);
 
   async function claim() {
     setMsg("");
@@ -72,11 +78,16 @@ export default function Home() {
       {!selectedFresh && (
         <section className="card">
           <div className="bar">
-            <div className="pill">
-              <button onClick={() => setCount(c => Math.max(4, c - 4))}>◀</button>
-              Next {count} Wednesdays
-              <button onClick={() => setCount(c => Math.min(52, c + 4))}>▶</button>
-            </div>
+          <div className="pill">
+             <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}>◀</button>
+
+             {weeks?.length
+              ? `${formatShort(weeks[0].date)} – ${formatShort(weeks[weeks.length - 1].date)}`
+              : "Loading…"
+              }
+
+              <button onClick={() => setPage((p) => p + 1)}>▶</button>
+          </div>
             <button className="btn secondary" onClick={refresh}>Refresh</button>
           </div>
 
